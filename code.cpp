@@ -135,9 +135,9 @@ public:
 int main() {
     // Setup services and destinations
     Service service;
-    Destination dest1{"192.168.0.1", 12};
-    Destination dest2{"192.168.0.2", 20};
-    Destination dest3{"192.168.0.3", 15};
+    Destination dest1{"192.168.0.1", 2};
+    Destination dest2{"192.168.0.2", 3};
+    Destination dest3{"192.168.0.3", 4};
 
     service.addDestination(&dest1);
     service.addDestination(&dest2);
@@ -187,12 +187,18 @@ int main() {
         request.requestType = "http";
 
         try {
-            Destination* destination = lb->balanceLoad(request);
-            cout << "Request routed to: " << destination->ipAddress << "\n";
+                Destination* destination = lb->balanceLoad(request);
+                // Actually try to accept it
+                if (!destination->acceptRequest(request)) {
+                    cout << "All servers are overloaded; try again later.\n";
+                    continue;   // skip completion, go back to choosing algorithm
+                }
 
-            destination->acceptRequest(request);
-            // Simulate request completion (in real life, this would happen asynchronously)
-            destination->completeRequest();
+                // If accepted, report it
+                cout << "Request routed to: " << destination->ipAddress << "\n";
+
+                // When work is done, complete it
+                destination->completeRequest();
         } catch (const exception& e) {
             cout << "Error: " << e.what() << "\n";
             // e -> exception
