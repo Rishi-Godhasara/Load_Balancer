@@ -190,6 +190,7 @@ int main() {
             Destination* destination = lb->balanceLoad(request);
             cout << "Request routed to: " << destination->ipAddress << "\n";
 
+            destination->acceptRequest(request);
             // Simulate request completion (in real life, this would happen asynchronously)
             destination->completeRequest();
         } catch (const exception& e) {
